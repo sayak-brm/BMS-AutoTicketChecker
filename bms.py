@@ -93,7 +93,7 @@ class Event:
         soup = BeautifulSoup(page, 'html.parser')
         shows = str(soup.find_all('div', {'data-online': 'Y'}))
         shows_soup = BeautifulSoup(shows, 'html.parser')
-        
+
         title_element = soup.find(attrs={'class' : 'cinema-name-wrapper'})
         try: self.title = title_element.find('a').text.strip()
         except Exception as ex: self.title = None
@@ -139,7 +139,7 @@ def run(city, pref_venues, movie, date):
         try:
             movie.get_shows()
         except Exception as ex:
-            print("Error: ", str(ex)) 
+            print("Error: ", str(ex))
 
         if not movie.tickets_available():
             print("Not available yet")
@@ -160,4 +160,4 @@ if __name__ == '__main__':
 
     pref_venues = list(filter(None, pref_venues))
     run(city, pref_venues, movie, date)
-    
+
