@@ -51,7 +51,7 @@ class Event:
     @staticmethod
     def get_cities():
         cities = []
-        with open('./res/cities.dat', 'r') as dat:
+        with open(cd + '/res/cities.dat', 'r') as dat:
             for city in dat: cities.append(city[:-1])
         return cities
 
@@ -152,6 +152,10 @@ def run(city, pref_venues, movie, date):
     input('\nPress Enter to exit...')
     sys.exit()
 
+cd = os.path.dirname(os.path.abspath(__file__))
+if getattr(sys, 'frozen', False):
+    cd = sys._MEIPASS
+
 if __name__ == '__main__':
     city = input("City: ")
     pref_venues = [venue.strip() for venue in input("Pref. Venues (comma-separated): ").upper().split(',')]
@@ -160,4 +164,3 @@ if __name__ == '__main__':
 
     pref_venues = list(filter(None, pref_venues))
     run(city, pref_venues, movie, date)
-
