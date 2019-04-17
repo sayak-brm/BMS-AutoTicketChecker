@@ -25,7 +25,7 @@ class main_wx(wx.Frame):
         self.notebook_1_Running = wx.Panel(self.notebook_1, wx.ID_ANY)
         self.list_ctrl_1 = wx.ListCtrl(self.notebook_1_Running, wx.ID_ANY, style=wx.LC_HRULES | wx.LC_REPORT | wx.LC_SINGLE_SEL | wx.LC_VRULES)
         self.notebook_1_About = wx.Panel(self.notebook_1, wx.ID_ANY)
-        self.hyperlink_1 = wx.adv.HyperlinkCtrl(self.notebook_1_About, wx.ID_ANY, "https://github.com/sayakbrm/BMSAutoTicketBooker", "https://github.com/sayakbrm/BMSAutoTicketBooker", style=wx.adv.HL_ALIGN_CENTRE)
+        self.hyperlink_1 = wx.adv.HyperlinkCtrl(self.notebook_1_About, wx.ID_ANY, "https://github.com/sayak-brm/BMS-AutoTicketChecker", "https://github.com/sayak-brm/BMS-AutoTicketChecker", style=wx.adv.HL_ALIGN_CENTRE)
 
         self.__set_properties()
         self.__do_layout()
