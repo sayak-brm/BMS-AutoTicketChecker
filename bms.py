@@ -58,7 +58,7 @@ class Event:
     def config(self):
         date_obj = datetime.datetime.now(pytz.timezone('Asia/Calcutta'))
         today = date_obj.strftime('%Y%m%d')
-        config_dat = './res/{}.dat'.format('-'.join([self.city.lower(), self.movie.lower(), *self.pref_venues]))
+        config_dat = './dat/{}.dat'.format('-'.join([self.city.lower(), self.movie.lower(), *self.pref_venues]))
 
         if os.path.isfile(config_dat):
             with open(config_dat, 'r') as cfg:
