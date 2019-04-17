@@ -86,7 +86,7 @@ class main_wx(wx.Frame):
         label_title = wx.StaticText(self.notebook_1_About, wx.ID_ANY, "BMS AutoTicketChecker")
         label_title.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
         sizer_5.Add(label_title, 0, wx.ALIGN_CENTER, 0)
-        label_author = wx.StaticText(self.notebook_1_About, wx.ID_ANY, "Version: 0.3.2", style=wx.ALIGN_CENTER)
+        label_author = wx.StaticText(self.notebook_1_About, wx.ID_ANY, "Version: 0.3.3", style=wx.ALIGN_CENTER)
         label_author.SetFont(wx.Font(9, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_LIGHT, 0, ""))
         sizer_5.Add(label_author, 0, wx.ALIGN_CENTER, 0)
         label_5 = wx.StaticText(self.notebook_1_About, wx.ID_ANY, "Author: @sayakbrm (GitHub)")
