@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# -*- coding: UTF-8 -*-
+
 import urllib.request, urllib.error, urllib.parse
 import re
 import time
@@ -6,9 +8,9 @@ import datetime
 import os
 import sys
 
-from notify_run import Notify
+import notify_run
 import pytz
-from bs4 import BeautifulSoup
+import bs4
 
 class Event:
     def __init__(self, city, pref_venues, movie, date):
@@ -30,7 +32,7 @@ class Event:
 
     @staticmethod
     def get_regex_url(url, regex):
-        soup = BeautifulSoup(urllib.request.urlopen(url), 'html.parser')
+        soup = bs4.BeautifulSoup(urllib.request.urlopen(url), 'html.parser')
         return soup.find('a', href=re.compile(regex)).attrs['href']
 
     @staticmethod
@@ -68,11 +70,11 @@ class Event:
                 cfgs = cfg.readline().split(',')
                 self.endpoint = cfgs[0]
                 self.url = cfgs[1]
-                self.notify = Notify(endpoint = self.endpoint)
+                self.notify = notify_run.Notify(endpoint = self.endpoint)
                 self.date = self.date if self.date and int(self.date) >= int(today) else cfgs[2]
                 self.date = self.date if int(self.date) >= int(today) else today
         else:
-            self.notify = Notify()
+            self.notify = notify_run.Notify()
             self.endpoint = self.notify.register().endpoint
             stub = self.get_movie_stub(self.city, self.movie)
             self.url = self.get_ticket_url(stub)
@@ -90,9 +92,9 @@ class Event:
     def get_shows(self):
         req = urllib.request.Request(self.url)
         page = urllib.request.urlopen(req)
-        soup = BeautifulSoup(page, 'html.parser')
+        soup = bs4.BeautifulSoup(page, 'html.parser')
         shows = str(soup.find_all('div', {'data-online': 'Y'}))
-        shows_soup = BeautifulSoup(shows, 'html.parser')
+        shows_soup = bs4.BeautifulSoup(shows, 'html.parser')
 
         title_element = soup.find(attrs={'class' : 'cinema-name-wrapper'})
         try: self.title = title_element.find('a').text.strip()
@@ -100,10 +102,10 @@ class Event:
 
         self.shows ={}
         venue_list = str(soup.find('ul', {'id': 'venuelist'}))
-        venue_soup = BeautifulSoup(venue_list, 'html.parser')
+        venue_soup = bs4.BeautifulSoup(venue_list, 'html.parser')
         for venue in venue_soup.find_all('li'):
             times = str(shows_soup.find_all('a', {'data-venue-code': venue['data-id']}))
-            times_soup = BeautifulSoup(times, 'html.parser')
+            times_soup = bs4.BeautifulSoup(times, 'html.parser')
             self.shows[venue['data-id']] = (venue['data-name'], [show_time.text.strip() for show_time in times_soup.findAll(attrs={'data-venue-code' : venue['data-id']})])
 
     def send_push(self):
