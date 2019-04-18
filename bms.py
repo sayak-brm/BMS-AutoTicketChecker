@@ -46,7 +46,7 @@ class Event:
     def get_ticket_url(movie_stub):
         base_url = 'https://in.bookmyshow.com'
         _, city, _, movie_name, movie_id = movie_stub.split('/')
-        region_code = Event.get_regex_url(base_url + movie_stub, 'https:\/\/support[.]bookmyshow[.]com\/support\/home[?]regionCode=(\w\w\w\w)')[-4:]
+        region_code = Event.get_regex_url(base_url + movie_stub, 'https:\/\/support[.]bookmyshow[.]com\/support\/home[?]regionCode=(\w\w\w\w*)').split('=')[1]
         ticket_url = "https://in.bookmyshow.com/buytickets/{}-{}/movie-{}-{}-MT/".format(movie_name, city, region_code.lower(), movie_id)
         return ticket_url
 
