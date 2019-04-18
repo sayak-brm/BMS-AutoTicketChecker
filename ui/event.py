@@ -81,7 +81,7 @@ class event_wx(wx.Frame):
         sizer_9 = wx.BoxSizer(wx.HORIZONTAL)
         sizer_10 = wx.BoxSizer(wx.HORIZONTAL)
         grid_sizer_3 = wx.GridBagSizer(10, 10)
-        self.label_8 = wx.StaticText(self.panel_1, wx.ID_ANY, "", style=wx.ALIGN_CENTER)
+        self.label_8 = wx.StaticText(self.panel_1, wx.ID_ANY, "", style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE)
         self.label_8.SetForegroundColour(wx.Colour(255, 255, 255))
         self.label_8.SetFont(wx.Font(10, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
         grid_sizer_3.Add(self.label_8, (0, 0), (1, 2), wx.ALIGN_CENTER | wx.ALL | wx.EXPAND, 2)
