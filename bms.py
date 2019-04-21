@@ -28,6 +28,8 @@ import notify_run
 import pytz
 import bs4
 
+headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/70.0.3538.77 Chrome/70.0.3538.77 Safari/537.36', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3', 'Accept-Encoding': 'none', 'Accept-Language': 'en-US,en;q=0.8', 'Connection': 'keep-alive'}
+
 class Event:
     def __init__(self, city, pref_venues, movie, date):
         clean_city = []
@@ -48,7 +50,8 @@ class Event:
 
     @staticmethod
     def get_regex_url(url, regex):
-        soup = bs4.BeautifulSoup(urllib.request.urlopen(url), 'html.parser')
+        req = urllib.request.Request(url, headers = headers)
+        soup = bs4.BeautifulSoup(urllib.request.urlopen(req), 'html.parser')
         return soup.find('a', href=re.compile(regex)).attrs['href']
 
     @staticmethod
@@ -106,7 +109,7 @@ class Event:
         return self.title is not None
 
     def get_shows(self):
-        req = urllib.request.Request(self.url)
+        req = urllib.request.Request(self.url, headers = headers)
         page = urllib.request.urlopen(req)
         soup = bs4.BeautifulSoup(page, 'html.parser')
         shows = str(soup.find_all('div', {'data-online': 'Y'}))

@@ -65,19 +65,19 @@ class EventHandler(threading.Thread):
             except Exception as ex:
                 self.viewer.set_status('Error: {}'.format(str(ex)), '#c64343')
 
-            if not self.event.tickets_available():
-                for _ in range(5*4*60):
-                    if self.quit:
-                        return
-                    time.sleep(.25)
-            else: break
+            if self.event.tickets_available():
+                pref = False if len(self.pref_venues) > 0 else True
+                for venue_id in self.event.shows.keys():
+                    pref = pref or venue_id in self.pref_venues
+                if pref: break
+                else: self.viewer.set_status('Tickets available in different venue!', '#c64343')
+
+            for _ in range(5*4*60):
+                if self.quit: return
+                time.sleep(.25)
 
         self.viewer.button_2.Enable(False)
         self.viewer.set_status('TICKETS AVAILABLE!', '#00d86c')
-
-        pref = False if len(self.pref_venues) > 0 else True
-        for venue_id in self.event.shows.keys():
-            pref = pref or venue_id in self.pref_venues
-        if pref: self.event.send_push()
+        self.event.send_push()
 
         wx.MessageBox('{} available in {} on {}! BOOK NOW!'.format(self.event.title, self.city, self.date_ob.Format('%d/%m/%Y')), 'AVAILABLE - BMS ATC', wx.OK | wx.ICON_INFORMATION)
