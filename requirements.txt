@@ -1,0 +1,3 @@
+wxPython
+notify_run
+bs4

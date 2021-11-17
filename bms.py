@@ -23,6 +23,7 @@ import time
 import datetime
 import os
 import sys
+import traceback
 
 import notify_run
 import pytz
@@ -43,7 +44,7 @@ class Event:
         self.date = date
         self.title = None
         self.notify = None
-        self.url = ''
+        self.urls = []
         self.shows = None
         self.endpoint = ''
         self.pref_venues = pref_venues
@@ -55,19 +56,31 @@ class Event:
         return soup.find('a', href=re.compile(regex)).attrs['href']
 
     @staticmethod
-    def get_movie_stub(city, movie):
-        base_url = 'https://in.bookmyshow.com'
-        city_url = base_url + '/' + city
-        stub = Event.get_regex_url(city_url, '{}\/movies\/.*{}.*'.format(city.lower(), movie.lower()))
-        return stub if stub[0] == '/' else '/' + stub
+    def get_regex_text(url, regex):
+        req = urllib.request.Request(url, headers = headers)
+        html = ''
+        with urllib.request.urlopen(req) as res:
+            html = res.read()
+        expr = re.compile(regex)
+        return re.findall(expr, html.decode(encoding='UTF-8'))
 
     @staticmethod
-    def get_ticket_url(movie_stub):
+    def get_movie_url(city, movie):
         base_url = 'https://in.bookmyshow.com'
-        _, city, _, movie_name, movie_id = movie_stub.split('/')
-        region_code = Event.get_regex_url(base_url + movie_stub, 'https:\/\/support[.]bookmyshow[.]com\/support\/home[?]regionCode=(\w\w\w\w*)').split('=')[1]
-        ticket_url = "https://in.bookmyshow.com/buytickets/{}-{}/movie-{}-{}-MT/".format(movie_name, city, region_code.lower(), movie_id)
-        return ticket_url
+        city_url = base_url + '/' + city
+        url = Event.get_regex_text(city_url, '"https:\/\/in.bookmyshow.com\/{}\/movies\/[\d\w\/-]*{}[\d\w\/-]*"'.format(city.lower(), movie.lower()))[0][1:-1]
+        return url
+
+    @staticmethod
+    def get_ticket_urls(movie_url):
+        base_url = 'https://in.bookmyshow.com'
+        _, _, _, city, _, movie_name, _ = movie_url.split('/')
+        movie_ids = [id[15:-7] for id in Event.get_regex_text(movie_url, '","eventCode":"[\w\d]{10}","anal')]
+        region_code = Event.get_regex_text(movie_url, f'"regionNameSlug":"{city}","regionCodeSlug":"\w\w\w\w?"')[0].split(':')[-1][1:-1]
+        ticket_urls = []
+        for movie_id in movie_ids:
+            ticket_urls.append("https://in.bookmyshow.com/buytickets/{}-{}/movie-{}-{}-MT/".format(movie_name, city, region_code.lower(), movie_id))
+        return ticket_urls
 
     @staticmethod
     def get_cities():
@@ -88,48 +101,54 @@ class Event:
             with open(config_dat, 'r') as cfg:
                 cfgs = cfg.readline().split(',')
                 self.endpoint = cfgs[0]
-                self.url = cfgs[1]
+                self.urls = cfgs[1].split('|')
                 self.notify = notify_run.Notify(endpoint = self.endpoint)
                 self.date = self.date if self.date and int(self.date) >= int(today) else cfgs[2]
                 self.date = self.date if int(self.date) >= int(today) else today
         else:
             self.notify = notify_run.Notify()
             self.endpoint = self.notify.register().endpoint
-            stub = self.get_movie_stub(self.city, self.movie)
-            self.url = self.get_ticket_url(stub)
+            movie_url = self.get_movie_url(self.city, self.movie)
+            self.urls = self.get_ticket_urls(movie_url)
             self.date = self.date if self.date and int(self.date) >= int(today) else today
 
         with open(config_dat, 'w') as cfg:
-            cfg.write(','.join([self.endpoint, self.url, self.date]))
+            cfg.write(','.join([self.endpoint, '|'.join(self.urls), self.date]))
 
     def get_channel(self):
-        return self.notify.info().channel_page
+        return 'https://notify.run/c/' + self.notify.endpoint.split('/')[-1]
 
     def tickets_available(self):
         return self.title is not None
 
     def get_shows(self):
-        req = urllib.request.Request(self.url, headers = headers)
-        page = urllib.request.urlopen(req)
-        soup = bs4.BeautifulSoup(page, 'html.parser')
-        shows = str(soup.find_all('div', {'data-online': 'Y'}))
-        shows_soup = bs4.BeautifulSoup(shows, 'html.parser')
-
-        title_element = soup.find(attrs={'class' : 'cinema-name-wrapper'})
-        try: self.title = title_element.find('a').text.strip()
-        except Exception as ex: self.title = None
-
         self.shows ={}
-        venue_list = str(soup.find('ul', {'id': 'venuelist'}))
-        venue_soup = bs4.BeautifulSoup(venue_list, 'html.parser')
-        for venue in venue_soup.find_all('li'):
-            times = str(shows_soup.find_all('a', {'data-venue-code': venue['data-id']}))
-            times_soup = bs4.BeautifulSoup(times, 'html.parser')
-            self.shows[venue['data-id']] = (venue['data-name'], [show_time.text.strip() for show_time in times_soup.findAll(attrs={'data-venue-code' : venue['data-id']})])
+        for url in self.urls:
+            req = urllib.request.Request(url + self.date, headers = headers)
+            page = urllib.request.urlopen(req)
+            soup = bs4.BeautifulSoup(page, 'html.parser')
+
+            lang = soup.find("div", attrs={'class' : "_languages-text"}).text.strip()
+            shows = str(soup.find_all('div', {'data-online': 'Y'}))
+            shows_soup = bs4.BeautifulSoup(shows, 'html.parser')
+
+            title_element = soup.find(attrs={'class' : 'cinema-name-wrapper'})
+            try: self.title = title_element.find('a').text.strip()
+            except Exception as ex: pass
+
+            venue_list = str(soup.find('ul', {'id': 'venuelist'}))
+            venue_soup = bs4.BeautifulSoup(venue_list, 'html.parser')
+            for venue in venue_soup.find_all('li'):
+                times = str(shows_soup.find_all('a', {'data-venue-code': venue['data-id']}))
+                times_soup = bs4.BeautifulSoup(times, 'html.parser')
+                self.shows[venue['data-id']] = self.shows.get(venue['data-id'], (venue['data-name'], [], []))
+                self.shows[venue['data-id']][1].append(lang)
+                for show_time in times_soup.findAll(attrs={'data-venue-code' : venue['data-id']}):
+                    self.shows[venue['data-id']][2].append(show_time.find("div", attrs={'class' : "__text"}).text.strip())
 
     def send_push(self):
         msg = 'Shows for {} is available on {} at a preferred venue! BOOK NOW!'.format(self.title, datetime.datetime.strptime(self.date, '%Y%m%d').strftime('%d/%m/%Y'))
-        self.notify.send(msg, self.url)
+        self.notify.send(msg, self.urls[0])
         return msg
 
 def display_shows(title, shows, pref_venues):
@@ -142,6 +161,11 @@ def display_shows(title, shows, pref_venues):
         for show_time in venue_info[1]:
             print('\t{:>2}) {}'.format(j, show_time))
             j = str(chr(ord(j)+1))
+        print('\n\tTimes:')
+        j = 'a'
+        for show_time in venue_info[2]:
+            print('\t{:>2}) {}'.format(j, show_time))
+            j = str(chr(ord(j)+1))
         i += 1
     return pref
 
@@ -150,7 +174,7 @@ def run(city, pref_venues, movie, date):
     try: movie.config()
     except Exception as ex:
         print('Unable to configure event!')
-        print("Error: ", str(ex))
+        print(traceback.format_exc())
         input('Press Enter to exit...')
         sys.exit()
 
