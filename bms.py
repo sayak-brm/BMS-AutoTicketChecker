@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 """
-   Copyright 2019 Sayak Brahmacahri
+   Copyright 2019-2021 Sayak Brahmacahri
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -68,7 +68,9 @@ class Event:
     def get_movie_url(city, movie):
         base_url = 'https://in.bookmyshow.com'
         city_url = base_url + '/' + city
-        url = Event.get_regex_text(city_url, '"https:\/\/in.bookmyshow.com\/{}\/movies\/[\d\w\/-]*{}[\d\w\/-]*"'.format(city.lower(), movie.lower()))[0][1:-1]
+        try:
+            url = Event.get_regex_text(city_url, '"https:\/\/in.bookmyshow.com\/{}\/movies\/[\d\w\/-]*{}[\d\w\/-]*"'.format(city.lower(), movie.lower()))[0][1:-1]
+        except IndexError: url = None
         return url
 
     @staticmethod
@@ -109,7 +111,8 @@ class Event:
             self.notify = notify_run.Notify()
             self.endpoint = self.notify.register().endpoint
             movie_url = self.get_movie_url(self.city, self.movie)
-            self.urls = self.get_ticket_urls(movie_url)
+            if movie_url: self.urls = self.get_ticket_urls(movie_url)
+            else: self.urls = []
             self.date = self.date if self.date and int(self.date) >= int(today) else today
 
         with open(config_dat, 'w') as cfg:
@@ -122,6 +125,13 @@ class Event:
         return self.title is not None
 
     def get_shows(self):
+        if self.urls == []:
+            movie_url = self.get_movie_url(self.city, self.movie)
+            if movie_url: self.urls = self.get_ticket_urls(movie_url)
+            else: self.urls = []
+            with open(config_dat, 'w') as cfg:
+                cfg.write(','.join([self.endpoint, '|'.join(self.urls), self.date]))
+
         self.shows ={}
         for url in self.urls:
             req = urllib.request.Request(url + self.date, headers = headers)

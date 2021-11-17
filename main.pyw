@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 """
-   Copyright 2019 Sayak Brahmacahri
+   Copyright 2019-2021 Sayak Brahmacahri
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
    limitations under the License.
 """
 
+import locale
 import wx
 
 import bms
@@ -32,4 +33,5 @@ class AutoTicketChecker(wx.App):
 
 if __name__ == "__main__":
     app = AutoTicketChecker(0)
+    locale.setlocale(locale.LC_ALL, '')
     app.MainLoop()

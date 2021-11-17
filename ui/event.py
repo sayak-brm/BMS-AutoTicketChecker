@@ -1,5 +1,5 @@
 """
-   Copyright 2019 Sayak Brahmacahri
+   Copyright 2019-2021 Sayak Brahmacahri
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -43,6 +43,9 @@ class event_wx(wx.Frame):
         self.button_2 = wx.Button(self.panel_1, wx.ID_STOP, "")
         self.hyperlink_3 = wx.adv.HyperlinkCtrl(self.panel_1, wx.ID_ANY, "BUY NOW", "")
         self.hyperlink_2 = wx.adv.HyperlinkCtrl(self.panel_1, wx.ID_ANY, "Subscribe to Notifications", "", style=wx.adv.HL_ALIGN_CENTRE)
+        self.label_8 = wx.StaticText(self.panel_1, wx.ID_ANY, "", style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE)
+        self.label_8.SetForegroundColour(wx.Colour(255, 255, 255))
+        self.label_8.SetFont(wx.Font(10, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
 
         self.city = self.choice_city.GetString(self.city_id)
 
@@ -60,7 +63,8 @@ class event_wx(wx.Frame):
 
     def config(self):
         self.channel = self.event.get_channel()
-        self.url = self.event.url
+        if self.event.urls: self.url = self.event.urls[0]
+        else: self.url = 'https://in.bookmyshow.com'
         self.hyperlink_2.SetURL(self.channel)
         self.hyperlink_2.SetLabel('Subscribe: {}'.format(self.channel))
         self.hyperlink_3.SetURL(self.url)
@@ -71,6 +75,9 @@ class event_wx(wx.Frame):
         self.SetSize((450, 317))
 
     def set_status(self, msg, col):
+        if self.event.urls: self.url = self.event.urls[0]
+        else: self.url = 'https://in.bookmyshow.com'
+        self.hyperlink_2.SetURL(self.channel)
         self.label_8.SetLabel(msg)
         get_rgb = lambda h: tuple(int(h.lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
         self.label_8.SetBackgroundColour(wx.Colour(*get_rgb(col)))
@@ -97,9 +104,6 @@ class event_wx(wx.Frame):
         sizer_9 = wx.BoxSizer(wx.HORIZONTAL)
         sizer_10 = wx.BoxSizer(wx.HORIZONTAL)
         grid_sizer_3 = wx.GridBagSizer(10, 10)
-        self.label_8 = wx.StaticText(self.panel_1, wx.ID_ANY, "", style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE)
-        self.label_8.SetForegroundColour(wx.Colour(255, 255, 255))
-        self.label_8.SetFont(wx.Font(10, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, 0, ""))
         grid_sizer_3.Add(self.label_8, (0, 0), (1, 2), wx.ALIGN_CENTER | wx.ALL | wx.EXPAND, 2)
         label_9 = wx.StaticText(self.panel_1, wx.ID_ANY, "City")
         grid_sizer_3.Add(label_9, (1, 0), (1, 1), wx.ALIGN_CENTER_VERTICAL, 0)
