@@ -41,7 +41,7 @@ class event_wx(wx.Frame):
         self.text_ctrl_movie = wx.TextCtrl(self.panel_1, wx.ID_ANY, self.movie)
         self.datepicker_ctrl_2 = wx.adv.DatePickerCtrl(self.panel_1, wx.ID_ANY, style=wx.adv.DP_DEFAULT | wx.adv.DP_DROPDOWN | wx.adv.DP_SHOWCENTURY)
         self.button_2 = wx.Button(self.panel_1, wx.ID_STOP, "")
-        self.hyperlink_3 = wx.adv.HyperlinkCtrl(self.panel_1, wx.ID_ANY, "BUY NOW", "")
+        self.hyperlink_3 = wx.adv.HyperlinkCtrl(self.panel_1, wx.ID_ANY, "BUY NOW", 'https://in.bookmyshow.com')
         self.hyperlink_2 = wx.adv.HyperlinkCtrl(self.panel_1, wx.ID_ANY, "Subscribe to Notifications", "", style=wx.adv.HL_ALIGN_CENTRE)
         self.label_8 = wx.StaticText(self.panel_1, wx.ID_ANY, "", style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE)
         self.label_8.SetForegroundColour(wx.Colour(255, 255, 255))
